@@ -92,6 +92,15 @@
   select:focus,input:focus{outline:2px solid var(--tan);outline-offset:1px;}
   .duration-note{font-size:12px;color:var(--espresso-soft);margin-top:6px;}
 
+  .contact-toggle{display:flex;gap:8px;}
+  .contact-option{
+    flex:1;text-align:center;padding:10px;border-radius:6px;font-size:13px;
+    border:1px solid var(--hairline);cursor:pointer;background:#fff;color:var(--espresso);
+    transition:border-color 0.2s ease;
+  }
+  .contact-option:hover{border-color:var(--tan);}
+  .contact-option.selected{background:var(--espresso);border-color:var(--espresso);color:var(--cream);font-weight:500;}
+
   input[type=range]{
     -webkit-appearance:none;appearance:none;
     padding:0;border:none;background:transparent;height:18px;
@@ -264,6 +273,13 @@
         <label for="input-instagram">Usuario de Instagram</label>
         <input type="text" id="input-instagram" placeholder="@tu_usuario" required>
       </div>
+      <div class="field-row">
+        <label>¿Por dónde prefieres que te contactemos?</label>
+        <div class="contact-toggle" id="contact-toggle">
+          <div class="contact-option" data-channel="WhatsApp">WhatsApp</div>
+          <div class="contact-option" data-channel="Instagram">Instagram</div>
+        </div>
+      </div>
       <div class="step-actions">
         <button class="link-btn" id="back-to-slots">Volver</button>
         <button class="cta" id="confirm-btn">Solicitar esta cita</button>
@@ -297,7 +313,7 @@
 </div>
 
 <script>
-  const state = { service:null, timezone:'America/Bogota', slot:null, duration:180 };
+  const state = { service:null, timezone:'America/Bogota', slot:null, duration:180, contactPreference:null };
 
   const serviceGrid = document.getElementById('service-grid');
   const bookingSection = document.getElementById('booking-section');
@@ -367,6 +383,15 @@
   const backToSlots = document.getElementById('back-to-slots');
   const confirmBtn = document.getElementById('confirm-btn');
   const restartBtn = document.getElementById('restart-btn');
+  const contactToggle = document.getElementById('contact-toggle');
+
+  contactToggle.addEventListener('click', e=>{
+    const opt = e.target.closest('.contact-option');
+    if(!opt) return;
+    document.querySelectorAll('.contact-option').forEach(o=>o.classList.remove('selected'));
+    opt.classList.add('selected');
+    state.contactPreference = opt.dataset.channel;
+  });
 
   const daySlider = document.getElementById('day-scroller');
   const timeHint = document.getElementById('time-hint');
@@ -460,8 +485,8 @@
     const name = document.getElementById('input-name').value.trim();
     const whatsapp = document.getElementById('input-whatsapp').value.trim();
     const instagram = document.getElementById('input-instagram').value.trim();
-    if(!name || !whatsapp || !instagram){
-      alert('Por favor completa tu nombre, WhatsApp e Instagram.');
+    if(!name || !whatsapp || !instagram || !state.contactPreference){
+      alert('Por favor completa tu nombre, WhatsApp, Instagram, y elige por dónde prefieres que te contactemos.');
       return;
     }
     // En producción: este paso envía la solicitud al backend, que la
@@ -469,7 +494,7 @@
     // (ver historia de usuario #5) y no crea el evento en el calendario
     // hasta que ella confirme.
     document.getElementById('pending-summary-detail').textContent =
-      name + ', tu solicitud para ' + state.service + ' (' + formatDuration(state.duration) + ') el ' + state.slot + ' fue enviada.';
+      name + ', tu solicitud para ' + state.service + ' (' + formatDuration(state.duration) + ') el ' + state.slot + ' fue enviada. Te contactaremos por ' + state.contactPreference + '.';
     stepDetails.classList.add('hidden');
     stepPending.classList.remove('hidden');
   });
