@@ -38,7 +38,8 @@
   a{color:inherit;}
 
   /* Hero */
-  .hero{padding:56px 24px 40px;text-align:center;}
+  .hero{padding:56px 24px 8px;text-align:center;}
+  .step-hint{font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--tan-dark);text-align:center;margin-bottom:14px;}
   .mark{
     width:88px;height:88px;border-radius:50%;
     background:var(--tan);
@@ -67,7 +68,7 @@
   .divider{border:none;border-top:1px solid var(--hairline);margin:0;}
 
   /* Services */
-  .services{padding:40px 24px;}
+  .services{padding:8px 24px 40px;}
   .services h2{font-size:22px;text-align:center;margin-bottom:24px;}
   .service-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
   .service-card{
@@ -139,14 +140,11 @@
   <section class="hero">
     <div class="mark"><span>Rèv</span></div>
     <h1 class="logotype">Reverie Brides</h1>
-    <p class="tagline">Maquillaje de novia en Bogotá, por Daniela Muñoz. Reserva tu cita de prueba en minutos.</p>
-    <button class="cta" id="start-btn">Reservar cita</button>
+    <p class="tagline">Maquillaje de novia en Bogotá, por Daniela Muñoz.</p>
   </section>
 
-  <hr class="divider">
-
   <section class="services" id="services-section">
-    <h2>¿Qué estás buscando?</h2>
+    <p class="step-hint">Elige un servicio para comenzar</p>
     <div class="service-grid" id="service-grid">
       <div class="service-card" data-service="Novia">
         <span class="label">Novia</span>
@@ -175,8 +173,10 @@
         <select id="tz-select">
           <option value="America/Bogota">Colombia (hora de Bogotá)</option>
           <option value="Europe/Madrid">España (hora de Madrid)</option>
-          <option value="America/New_York">Estados Unidos, costa este</option>
-          <option value="America/Los_Angeles">Estados Unidos, costa oeste</option>
+          <option value="America/New_York">Nueva York, EE. UU. (costa este)</option>
+          <option value="America/New_York">Miami, EE. UU. (costa este)</option>
+          <option value="America/Los_Angeles">Los Ángeles, EE. UU. (costa oeste)</option>
+          <option value="America/Los_Angeles">Seattle, EE. UU. (costa oeste)</option>
           <option value="America/Mexico_City">México (Ciudad de México)</option>
         </select>
       </div>
@@ -209,8 +209,8 @@
         <input type="tel" id="input-whatsapp" placeholder="Ej. +57 300 123 4567">
       </div>
       <div class="field-row">
-        <label for="input-instagram">Instagram (opcional)</label>
-        <input type="text" id="input-instagram" placeholder="@tu_usuario">
+        <label for="input-instagram">Usuario de Instagram</label>
+        <input type="text" id="input-instagram" placeholder="@tu_usuario" required>
       </div>
       <div class="step-actions">
         <button class="link-btn" id="back-to-slots">Volver</button>
@@ -248,9 +248,7 @@
   const state = { service:null, timezone:'America/Bogota', slot:null };
 
   const serviceGrid = document.getElementById('service-grid');
-  const servicesSection = document.getElementById('services-section');
   const bookingSection = document.getElementById('booking-section');
-  const startBtn = document.getElementById('start-btn');
 
   function selectService(el){
     document.querySelectorAll('.service-card').forEach(c=>c.classList.remove('selected'));
@@ -262,10 +260,6 @@
   serviceGrid.addEventListener('click', e=>{
     const card = e.target.closest('.service-card');
     if(card) selectService(card);
-  });
-
-  startBtn.addEventListener('click', ()=>{
-    servicesSection.scrollIntoView({behavior:'smooth'});
   });
 
   function revealBooking(){
@@ -345,8 +339,9 @@
   confirmBtn.addEventListener('click', ()=>{
     const name = document.getElementById('input-name').value.trim();
     const whatsapp = document.getElementById('input-whatsapp').value.trim();
-    if(!name || !whatsapp){
-      alert('Por favor completa tu nombre y número de WhatsApp.');
+    const instagram = document.getElementById('input-instagram').value.trim();
+    if(!name || !whatsapp || !instagram){
+      alert('Por favor completa tu nombre, WhatsApp e Instagram.');
       return;
     }
     // En producción: este paso envía la solicitud al backend, que la
