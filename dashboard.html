@@ -17,7 +17,7 @@
   body{background:var(--cream);color:var(--espresso);font-family:'Jost',sans-serif;font-weight:300;line-height:1.6;}
   h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:500;}
 
-  #dashboard{max-width:800px;margin:0 auto;padding:32px 24px;}
+  #dashboard{max-width:880px;margin:0 auto;padding:32px 24px;}
   .dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
   .dash-title{font-size:20px;color:var(--espresso);}
   .dash-sub{font-size:12px;color:var(--espresso-soft);margin-top:2px;}
@@ -25,17 +25,29 @@
   .header-links{margin-top:6px;text-align:right;}
   .header-links a{font-size:11px;color:var(--espresso-soft);text-decoration:underline;margin-left:12px;}
 
-  .dash-grid{display:grid;grid-template-columns:220px 1fr;gap:16px;}
+  .dash-grid{display:grid;grid-template-columns:260px 1fr;gap:16px;}
   @media(max-width:640px){.dash-grid{grid-template-columns:1fr;}}
 
   .client-list-panel{background:var(--cream);border:1px solid var(--hairline);border-radius:10px;padding:12px;}
   .client-list-label{font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--tan-dark);margin-bottom:10px;}
+  #search-input{
+    width:100%;font-family:'Jost',sans-serif;font-size:13px;color:var(--espresso);
+    padding:8px 10px;border:1px solid var(--hairline);border-radius:6px;background:#fff;margin-bottom:8px;
+  }
+  #sort-select{
+    width:100%;font-family:'Jost',sans-serif;font-size:12px;color:var(--espresso);
+    padding:6px 8px;border:1px solid var(--hairline);border-radius:6px;background:#fff;margin-bottom:10px;
+  }
+  #search-input:focus, #sort-select:focus{outline:2px solid var(--tan);outline-offset:1px;}
+  .result-count{font-size:11px;color:var(--espresso-soft);margin-bottom:8px;}
+  .client-list-scroll{max-height:520px;overflow-y:auto;padding-right:2px;}
   .client-row{border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;border:1px solid var(--hairline);background:#fff;}
   .client-row.selected{background:var(--espresso);border-color:var(--espresso);color:var(--cream);}
   .client-row .name{font-size:13px;font-weight:500;}
   .client-row.selected .name{color:var(--cream);}
   .client-row .meta{font-size:10px;color:var(--espresso-soft);}
   .client-row.selected .meta{color:var(--cream);opacity:0.8;}
+  .no-results{font-size:12px;color:var(--espresso-soft);padding:10px 4px;}
 
   .detail-col{display:flex;flex-direction:column;gap:12px;}
   .card{background:#fff;border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;}
@@ -48,6 +60,14 @@
   .status-vencido{background:#F7E4E1;color:#A84949;}
   .summary-row{font-size:13px;color:var(--espresso);margin-bottom:8px;}
   .content-idea{border:1px solid var(--hairline);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--espresso);margin-bottom:8px;}
+
+  .ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;}
+  .ref-thumb{
+    aspect-ratio:1;border:1px dashed var(--tan);border-radius:8px;background:#FBF6EF;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px;
+  }
+  .ref-thumb .icon{font-size:18px;color:var(--tan-dark);}
+  .ref-thumb .label{font-size:9px;color:var(--espresso-soft);text-align:center;line-height:1.2;}
 </style>
 </head>
 <body>
@@ -70,7 +90,13 @@
   <div class="dash-grid">
     <div class="client-list-panel">
       <p class="client-list-label">Clientas</p>
-      <div id="client-list"></div>
+      <input type="text" id="search-input" placeholder="Buscar por nombre...">
+      <select id="sort-select">
+        <option value="date">Ordenar: Próxima cita</option>
+        <option value="name">Ordenar: Nombre (A-Z)</option>
+      </select>
+      <p class="result-count" id="result-count"></p>
+      <div class="client-list-scroll"><div id="client-list"></div></div>
     </div>
     <div class="detail-col" id="client-detail"></div>
   </div>
@@ -78,73 +104,139 @@
 
 <script>
   const clients = [
-    {
-      name: 'Valentina García', service:'Novia', channel:'WhatsApp', contact:'+57 300 123 4567',
+    { name:'Valentina García', service:'Novia', channel:'WhatsApp', contact:'+57 300 123 4567', date:'2026-07-09',
       status:'pagado', statusLabel:'Pagado',
       wedding:'Ceremonia religiosa en octubre, vestido de novia clásico con encaje',
       makeup:'Look natural, tonos tierra, base de larga duración para clima cálido',
       notes:'Piel sensible, prefiere productos hipoalergénicos. Trae a su madre y dama de honor a la prueba.',
-      content:[
-        'Reel de "antes y después" del look natural con tonos tierra',
-        'Carrusel mostrando productos hipoalergénicos usados en la prueba',
-        'Historia detrás de cámaras el día de la boda en octubre'
-      ]
-    },
-    {
-      name: 'Isabella T.', service:'Quince', channel:'Instagram', contact:'@isabella.t',
+      content:['Reel de "antes y después" del look natural con tonos tierra','Carrusel mostrando productos hipoalergénicos usados en la prueba'],
+      refs:[{icon:'💄',label:'Referencia de maquillaje'},{icon:'📷',label:'Foto de la clienta'}] },
+    { name:'Isabella Torres', service:'Quince', channel:'Instagram', contact:'@isabella.t', date:'2026-07-10',
       status:'pendiente', statusLabel:'Pendiente',
       wedding:'Fiesta de quince años en salón de eventos, vestido rosa palo con brillos',
       makeup:'Look glam, pestañas postizas, brillo en pómulos',
       notes:'Primera vez usando maquillaje profesional, algo nerviosa. Madre estará presente.',
-      content:[
-        'Reel del proceso completo de transformación',
-        'Carrusel de referencias de vestido y maquillaje a juego'
-      ]
-    },
-    {
-      name: 'Camila R.', service:'Novia', channel:'WhatsApp', contact:'+57 301 987 6543',
+      content:['Reel del proceso completo de transformación'],
+      refs:[{icon:'👗',label:'Foto del vestido'},{icon:'💄',label:'Referencia de maquillaje'},{icon:'📷',label:'Foto de la clienta'}] },
+    { name:'Camila Rodríguez', service:'Novia', channel:'WhatsApp', contact:'+57 301 987 6543', date:'2026-07-13',
       status:'vencido', statusLabel:'Pago vencido',
       wedding:'Boda de día completo, vestido de novia bohemio',
       makeup:'Look editorial, cejas marcadas, labios nude',
       notes:'Solicitó cambio de horario dos veces. Confirmar disponibilidad antes de seguir.',
-      content:[
-        'Publicación de "día completo" mostrando la jornada de novia'
-      ]
-    },
-    {
-      name: 'Sofía M.', service:'Sesión', channel:'Instagram', contact:'@sofia.m',
+      content:['Publicación de "día completo" mostrando la jornada de novia'],
+      refs:[{icon:'💄',label:'Referencia de maquillaje'}] },
+    { name:'Sofía Molina', service:'Sesión', channel:'Instagram', contact:'@sofia.m', date:'2026-07-14',
       status:'pagado', statusLabel:'Pagado',
       wedding:'Sesión de contenido para marca personal, sin evento asociado',
       makeup:'Look editorial versátil para varias tomas',
       notes:'Trae su propio fotógrafo. Necesita retoques entre tomas.',
-      content:[
-        'Detrás de cámaras de la sesión para el feed de Reverie Brides'
-      ]
-    },
+      content:['Detrás de cámaras de la sesión para el feed de Reverie Brides'],
+      refs:[{icon:'📷',label:'Foto de la clienta'}] },
+    { name:'Daniela Ramírez', service:'Novia', channel:'WhatsApp', contact:'+57 302 555 1122', date:'2026-07-16',
+      status:'pendiente', statusLabel:'Pendiente',
+      wedding:'Boda civil íntima, vestido corto minimalista',
+      makeup:'Look minimalista, piel luminosa, labios rosados',
+      notes:'Alérgica al látex, usar esponjas alternativas.',
+      content:['Carrusel "menos es más" para bodas civiles'],
+      refs:[{icon:'👗',label:'Foto del vestido'},{icon:'💄',label:'Referencia de maquillaje'}] },
+    { name:'Mariana Ospina', service:'Quince', channel:'WhatsApp', contact:'+57 304 222 8890', date:'2026-07-17',
+      status:'pagado', statusLabel:'Pagado',
+      wedding:'Quince años tema jardín, vestido verde esmeralda',
+      makeup:'Look natural con toque dorado en los ojos',
+      notes:'Quiere coordinar con el peinado de una estilista externa.',
+      content:['Reel de coordinación maquillaje + peinado'],
+      refs:[{icon:'👗',label:'Foto del vestido'},{icon:'📷',label:'Foto de la clienta'}] },
+    { name:'Laura Jiménez', service:'Novia', channel:'Instagram', contact:'@laura.jimenez', date:'2026-07-18',
+      status:'pendiente', statusLabel:'Pendiente',
+      wedding:'Boda de playa, vestido ligero de gasa',
+      makeup:'Look resistente al agua y la humedad',
+      notes:'Ceremonia al aire libre en la tarde, considerar el calor.',
+      content:['Publicación sobre maquillaje resistente al agua para bodas de playa'],
+      refs:[{icon:'💄',label:'Referencia de maquillaje'}] },
+    { name:'Natalia Vargas', service:'Sesión', channel:'WhatsApp', contact:'+57 305 776 4321', date:'2026-07-20',
+      status:'pagado', statusLabel:'Pagado',
+      wedding:'Sesión de fotos para portafolio de modelaje',
+      makeup:'Varios looks: natural, glam y editorial',
+      notes:'Sesión de 3 horas, tres cambios de look.',
+      content:['Serie de 3 publicaciones, una por cada look'],
+      refs:[{icon:'📷',label:'Foto de la clienta'},{icon:'💄',label:'Referencia de maquillaje'}] },
+    { name:'Paula Restrepo', service:'Quince', channel:'Instagram', contact:'@paula.r', date:'2026-07-21',
+      status:'vencido', statusLabel:'Pago vencido',
+      wedding:'Quince años tema vintage, vestido azul rey',
+      makeup:'Look retro, delineado marcado, labios rojos',
+      notes:'No ha respondido al recordatorio de pago, hacer seguimiento.',
+      content:['Reel temático "quince vintage"'],
+      refs:[{icon:'👗',label:'Foto del vestido'}] },
+    { name:'Andrea Gómez', service:'Novia', channel:'WhatsApp', contact:'+57 300 444 9988', date:'2026-07-23',
+      status:'pagado', statusLabel:'Pagado',
+      wedding:'Boda en finca campestre, vestido romántico con mangas',
+      makeup:'Look romántico, rubor intenso, cejas suaves',
+      notes:'Trae dos damas de honor que también necesitan maquillaje.',
+      content:['Carrusel "novia + damas de honor" del mismo evento'],
+      refs:[{icon:'👗',label:'Foto del vestido'},{icon:'📷',label:'Foto de la clienta'},{icon:'💄',label:'Referencia de maquillaje'}] },
+    { name:'Juliana Castro', service:'Sesión', channel:'Instagram', contact:'@juliana.castro', date:'2026-07-24',
+      status:'pendiente', statusLabel:'Pendiente',
+      wedding:'Sesión de contenido para lanzamiento de marca de ropa',
+      makeup:'Look comercial limpio, enfoque en piel',
+      notes:'Cliente corporativo, coordinar con agencia de marketing.',
+      content:['Publicación patrocinada mostrando el trabajo de maquillaje comercial'],
+      refs:[{icon:'📷',label:'Foto de la clienta'}] },
+    { name:'Valeria Herrera', service:'Novia', channel:'Instagram', contact:'@valeria.h', date:'2026-07-25',
+      status:'pendiente', statusLabel:'Pendiente',
+      wedding:'Boda religiosa tradicional, vestido con cola larga',
+      makeup:'Look clásico atemporal, tonos neutros',
+      notes:'Solicita prueba adicional una semana antes de la boda.',
+      content:['Reel "prueba vs. día real" comparando ambos looks'],
+      refs:[{icon:'👗',label:'Foto del vestido'},{icon:'💄',label:'Referencia de maquillaje'}] },
   ];
 
-  let selectedIndex = 0;
+  let selectedName = clients[0].name;
+
+  function getFiltered(){
+    const term = document.getElementById('search-input').value.trim().toLowerCase();
+    const sortBy = document.getElementById('sort-select').value;
+    let list = clients.filter(c => c.name.toLowerCase().includes(term));
+    if(sortBy === 'date'){
+      list = list.slice().sort((a,b) => a.date.localeCompare(b.date));
+    } else {
+      list = list.slice().sort((a,b) => a.name.localeCompare(b.name));
+    }
+    return list;
+  }
+
+  function formatDate(iso){
+    const [y,m,d] = iso.split('-');
+    const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    return d + ' ' + meses[Number(m)-1];
+  }
 
   function renderClientList(){
-    const list = document.getElementById('client-list');
-    list.innerHTML = '';
-    clients.forEach((c, i) => {
+    const list = getFiltered();
+    const container = document.getElementById('client-list');
+    document.getElementById('result-count').textContent = list.length + (list.length === 1 ? ' clienta encontrada' : ' clientas encontradas');
+    container.innerHTML = '';
+    if(list.length === 0){
+      container.innerHTML = '<div class="no-results">No se encontraron clientas con ese nombre.</div>';
+      return;
+    }
+    list.forEach(c => {
       const row = document.createElement('div');
-      row.className = 'client-row' + (i === selectedIndex ? ' selected' : '');
-      row.innerHTML = '<div class="name">'+c.name+'</div><div class="meta">'+c.service+' · '+c.channel+'</div>';
-      row.addEventListener('click', () => { selectedIndex = i; renderClientList(); renderDetail(); });
-      list.appendChild(row);
+      row.className = 'client-row' + (c.name === selectedName ? ' selected' : '');
+      row.innerHTML = '<div class="name">'+c.name+'</div><div class="meta">'+formatDate(c.date)+' · '+c.service+' · '+c.channel+'</div>';
+      row.addEventListener('click', () => { selectedName = c.name; renderClientList(); renderDetail(); });
+      container.appendChild(row);
     });
   }
 
   function renderDetail(){
-    const c = clients[selectedIndex];
+    const c = clients.find(x => x.name === selectedName) || getFiltered()[0];
     const detail = document.getElementById('client-detail');
+    if(!c){ detail.innerHTML = ''; return; }
     detail.innerHTML =
       '<div class="card">'
         + '<div style="display:flex;justify-content:space-between;align-items:center;">'
           + '<div><div class="client-name">'+c.name+'</div>'
-          + '<div class="client-contact">Prefiere ser contactada por '+c.channel+' · '+c.contact+'</div></div>'
+          + '<div class="client-contact">Prefiere ser contactada por '+c.channel+' · '+c.contact+' · Cita: '+formatDate(c.date)+'</div></div>'
           + '<div class="status-badge status-'+c.status+'">'+c.statusLabel+'</div>'
         + '</div>'
       + '</div>'
@@ -155,10 +247,23 @@
         + '<div class="summary-row"><strong>Notas adicionales:</strong> '+c.notes+'</div>'
       + '</div>'
       + '<div class="card">'
+        + '<p class="card-label">Imágenes de referencia capturadas por el agente</p>'
+        + '<div class="ref-grid">' + c.refs.map(r => '<div class="ref-thumb"><span class="icon">'+r.icon+'</span><span class="label">'+r.label+'</span></div>').join('') + '</div>'
+      + '</div>'
+      + '<div class="card">'
         + '<p class="card-label">Sugerencias de contenido para Instagram</p>'
         + c.content.map(item => '<div class="content-idea">'+item+'</div>').join('')
       + '</div>';
   }
+
+  document.getElementById('search-input').addEventListener('input', () => {
+    if(!getFiltered().some(c => c.name === selectedName) && getFiltered().length){
+      selectedName = getFiltered()[0].name;
+    }
+    renderClientList();
+    renderDetail();
+  });
+  document.getElementById('sort-select').addEventListener('change', () => { renderClientList(); renderDetail(); });
 
   renderClientList();
   renderDetail();
