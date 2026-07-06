@@ -101,6 +101,10 @@
   .contact-option:hover{border-color:var(--tan);}
   .contact-option.selected{background:var(--espresso);border-color:var(--espresso);color:var(--cream);font-weight:500;}
 
+  .phone-row{display:flex;gap:8px;}
+  .phone-row select{flex:0 0 42%;}
+  .phone-row input{flex:1;}
+
   input[type=range]{
     -webkit-appearance:none;appearance:none;
     padding:0;border:none;background:transparent;height:18px;
@@ -266,8 +270,16 @@
         <input type="text" id="input-name" placeholder="Ej. Valentina García">
       </div>
       <div class="field-row">
-        <label for="input-whatsapp">Número de WhatsApp</label>
-        <input type="tel" id="input-whatsapp" placeholder="Ej. +57 300 123 4567">
+        <label for="input-whatsapp-number">Número de WhatsApp</label>
+        <div class="phone-row">
+          <select id="input-country-code">
+            <option value="+57">Colombia (+57)</option>
+            <option value="+34">España (+34)</option>
+            <option value="+1">Estados Unidos (+1)</option>
+            <option value="+52">México (+52)</option>
+          </select>
+          <input type="tel" id="input-whatsapp-number" placeholder="300 123 4567">
+        </div>
       </div>
       <div class="field-row">
         <label for="input-instagram">Usuario de Instagram</label>
@@ -393,6 +405,12 @@
     state.contactPreference = opt.dataset.channel;
   });
 
+  const instagramInput = document.getElementById('input-instagram');
+  instagramInput.addEventListener('blur', ()=>{
+    const v = instagramInput.value.trim();
+    if(v && !v.startsWith('@')) instagramInput.value = '@'+v;
+  });
+
   const daySlider = document.getElementById('day-scroller');
   const timeHint = document.getElementById('time-hint');
   const timeGrid = document.getElementById('time-grid');
@@ -483,12 +501,15 @@
 
   confirmBtn.addEventListener('click', ()=>{
     const name = document.getElementById('input-name').value.trim();
-    const whatsapp = document.getElementById('input-whatsapp').value.trim();
-    const instagram = document.getElementById('input-instagram').value.trim();
-    if(!name || !whatsapp || !instagram || !state.contactPreference){
+    const countryCode = document.getElementById('input-country-code').value;
+    const phoneNumber = document.getElementById('input-whatsapp-number').value.trim();
+    let instagram = document.getElementById('input-instagram').value.trim();
+    if(instagram && !instagram.startsWith('@')) instagram = '@'+instagram;
+    if(!name || !phoneNumber || !instagram || !state.contactPreference){
       alert('Por favor completa tu nombre, WhatsApp, Instagram, y elige por dónde prefieres que te contactemos.');
       return;
     }
+    const whatsapp = countryCode + ' ' + phoneNumber;
     // En producción: este paso envía la solicitud al backend, que la
     // registra como "pendiente de aprobación" en el panel de Daniela
     // (ver historia de usuario #5) y no crea el evento en el calendario
