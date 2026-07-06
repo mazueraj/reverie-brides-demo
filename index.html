@@ -90,6 +90,29 @@
     padding:10px 12px;border:1px solid var(--hairline);border-radius:4px;background:#fff;
   }
   select:focus,input:focus{outline:2px solid var(--tan);outline-offset:1px;}
+  .duration-note{font-size:12px;color:var(--espresso-soft);margin-top:6px;}
+
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;
+    padding:0;border:none;background:transparent;height:18px;
+  }
+  input[type=range]:focus{outline:none;}
+  input[type=range]::-webkit-slider-runnable-track{
+    height:4px;background:var(--hairline);border-radius:2px;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;
+    width:18px;height:18px;border-radius:50%;
+    background:var(--tan-dark);border:2px solid var(--cream);
+    margin-top:-7px;cursor:pointer;
+  }
+  input[type=range]::-moz-range-track{
+    height:4px;background:var(--hairline);border-radius:2px;border:none;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:18px;height:18px;border-radius:50%;
+    background:var(--tan-dark);border:2px solid var(--cream);cursor:pointer;
+  }
 
   .slot-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
   .slot{
@@ -100,6 +123,28 @@
   .slot.selected{border-color:var(--tan-dark);background:#F7EFE5;font-weight:500;}
   .slot.empty{color:var(--espresso-soft);cursor:default;border-style:dashed;}
   .slot.empty:hover{border-color:var(--hairline);}
+
+  .day-scroller{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:16px;}
+  .day-pill{
+    flex:none;width:60px;text-align:center;padding:10px 4px;border-radius:8px;
+    border:1px solid var(--hairline);cursor:pointer;background:#fff;transition:border-color 0.2s ease;
+  }
+  .day-pill:hover{border-color:var(--tan);}
+  .day-pill.selected{background:var(--espresso);border-color:var(--espresso);}
+  .day-pill .dow{font-size:10px;text-transform:uppercase;color:var(--espresso-soft);}
+  .day-pill.selected .dow{color:var(--cream);opacity:0.8;}
+  .day-pill .num{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--espresso);}
+  .day-pill.selected .num{color:var(--cream);}
+  .day-pill .mon{font-size:9px;color:var(--espresso-soft);}
+  .day-pill.selected .mon{color:var(--cream);opacity:0.8;}
+  .time-hint{font-size:12px;color:var(--espresso-soft);margin-bottom:8px;}
+  .time-grid{display:flex;flex-direction:column;gap:8px;}
+  .time-slot{
+    border:1px solid var(--hairline);border-radius:6px;padding:10px 14px;font-size:13px;color:var(--espresso);
+    cursor:pointer;background:#fff;transition:border-color 0.2s ease;
+  }
+  .time-slot:hover{border-color:var(--tan);}
+  .time-slot.selected{border-color:var(--tan-dark);background:#F7EFE5;font-weight:500;}
 
   .step-actions{display:flex;justify-content:space-between;align-items:center;margin-top:24px;}
   .link-btn{background:none;border:none;font-size:13px;color:var(--espresso-soft);cursor:pointer;text-decoration:underline;}
@@ -188,9 +233,16 @@
 
     <!-- Paso 2: horario -->
     <div id="step-slots" class="hidden">
-      <p class="step-label">Paso 2 de 3 · Elige un horario</p>
+      <p class="step-label">Paso 2 de 3 · Duración y horario</p>
+      <div class="field-row">
+        <label for="duration-range">Duración de la sesión</label>
+        <input type="range" id="duration-range" min="60" max="240" step="15" value="180">
+        <p class="duration-note" id="duration-note"></p>
+      </div>
       <p style="font-size:13px;color:var(--espresso-soft);margin-bottom:14px;" id="slot-tz-note"></p>
-      <div class="slot-grid" id="slot-grid"></div>
+      <div class="day-scroller" id="day-scroller"></div>
+      <p class="time-hint" id="time-hint"></p>
+      <div class="time-grid" id="time-grid"></div>
       <div class="step-actions">
         <button class="link-btn" id="back-to-tz">Volver</button>
         <button class="cta" id="to-details-btn" disabled>Continuar</button>
@@ -245,15 +297,50 @@
 </div>
 
 <script>
-  const state = { service:null, timezone:'America/Bogota', slot:null };
+  const state = { service:null, timezone:'America/Bogota', slot:null, duration:180 };
 
   const serviceGrid = document.getElementById('service-grid');
   const bookingSection = document.getElementById('booking-section');
+  const durationRange = document.getElementById('duration-range');
+  const durationNote = document.getElementById('duration-note');
+
+  // Duración sugerida y mínima por tipo de servicio, en minutos.
+  // "Sesión" no tiene mínimo impuesto: la clienta elige libremente
+  // dentro de un rango razonable.
+  const durationConfig = {
+    'Novia':        { min:60, max:300, suggested:180, minLabel:'Mínimo: 1 hora' },
+    'Quinceañera':  { min:45, max:150, suggested:60,  minLabel:'Mínimo: 45 minutos' },
+    'Sesión':       { min:15, max:180, suggested:60,  minLabel:'Duración flexible' },
+  };
+
+  function formatDuration(mins){
+    const h = Math.floor(mins/60);
+    const m = mins%60;
+    if(h===0) return m+' min';
+    if(m===0) return h+(h===1?' hora':' horas');
+    return h+(h===1?' hora':' horas')+' '+m+' min';
+  }
+
+  function updateDurationNote(){
+    const cfg = durationConfig[state.service];
+    durationNote.textContent = 'Sugerido: '+formatDuration(cfg.suggested)+' · '+cfg.minLabel+' · Elegido: '+formatDuration(state.duration);
+  }
+
+  durationRange.addEventListener('input', ()=>{
+    state.duration = Number(durationRange.value);
+    updateDurationNote();
+  });
 
   function selectService(el){
     document.querySelectorAll('.service-card').forEach(c=>c.classList.remove('selected'));
     el.classList.add('selected');
     state.service = el.dataset.service;
+    const cfg = durationConfig[state.service];
+    durationRange.min = cfg.min;
+    durationRange.max = cfg.max;
+    durationRange.value = cfg.suggested;
+    state.duration = cfg.suggested;
+    updateDurationNote();
     revealBooking();
   }
 
@@ -273,7 +360,6 @@
   const stepSlots = document.getElementById('step-slots');
   const stepDetails = document.getElementById('step-details');
   const stepPending = document.getElementById('step-pending');
-  const slotGrid = document.getElementById('slot-grid');
   const slotTzNote = document.getElementById('slot-tz-note');
   const toSlotsBtn = document.getElementById('to-slots-btn');
   const toDetailsBtn = document.getElementById('to-details-btn');
@@ -282,32 +368,75 @@
   const confirmBtn = document.getElementById('confirm-btn');
   const restartBtn = document.getElementById('restart-btn');
 
-  // Datos de ejemplo. En producción, estos horarios vienen de una llamada
-  // al backend que consulta Google Calendar (freebusy) en America/Bogota
-  // y los convierte a la zona horaria elegida por la clienta.
-  const mockSlots = [
-    { label:'Mar 14 oct, 5:00 p.m.' },
-    { label:'Jue 16 oct, 6:30 p.m.' },
-    { label:'Sáb 18 oct, 3:00 p.m.' },
-    { label:'Lun 20 oct, 4:00 p.m.' },
+  const daySlider = document.getElementById('day-scroller');
+  const timeHint = document.getElementById('time-hint');
+  const timeGrid = document.getElementById('time-grid');
+  let selectedDayIndex = null;
+
+  // Horarios de ejemplo agrupados por día, basados en una consulta real
+  // al Google Calendar conectado (umejulian@gmail.com) el 6 de julio de
+  // 2026, evitando los bloques ya ocupados ese día. En producción, esta
+  // consulta debe apuntar al calendario del negocio de Daniela.
+  const mockDays = [
+    { dow:'Mié', num:8, mon:'jul', times:['11:00 a.m.', '2:00 p.m.'] },
+    { dow:'Vie', num:10, mon:'jul', times:['10:30 a.m.', '4:30 p.m.'] },
+    { dow:'Mar', num:14, mon:'jul', times:['9:00 a.m.', '3:00 p.m.'] },
+    { dow:'Jue', num:16, mon:'jul', times:['11:00 a.m.', '5:00 p.m.'] },
   ];
 
-  function renderSlots(){
+  function renderDays(){
     const tzLabel = tzSelect.options[tzSelect.selectedIndex].text;
     slotTzNote.textContent = 'Horarios mostrados en: ' + tzLabel;
-    slotGrid.innerHTML = '';
-    mockSlots.forEach((s,i)=>{
-      const div = document.createElement('div');
-      div.className = 'slot';
-      div.textContent = s.label;
-      div.dataset.index = i;
-      slotGrid.appendChild(div);
+    daySlider.innerHTML = '';
+    mockDays.forEach((d,i)=>{
+      const pill = document.createElement('div');
+      pill.className = 'day-pill';
+      pill.dataset.index = i;
+      pill.innerHTML = '<div class="dow">'+d.dow+'</div><div class="num">'+d.num+'</div><div class="mon">'+d.mon+'</div>';
+      daySlider.appendChild(pill);
     });
+    selectedDayIndex = null;
+    timeHint.textContent = '';
+    timeGrid.innerHTML = '';
+    toDetailsBtn.disabled = true;
   }
+
+  function selectDay(index){
+    selectedDayIndex = index;
+    document.querySelectorAll('.day-pill').forEach(p=>p.classList.remove('selected'));
+    daySlider.querySelector('[data-index="'+index+'"]').classList.add('selected');
+    const day = mockDays[index];
+    timeHint.textContent = 'Horarios disponibles el ' + day.dow.toLowerCase() + ' ' + day.num + ':';
+    timeGrid.innerHTML = '';
+    day.times.forEach(t=>{
+      const el = document.createElement('div');
+      el.className = 'time-slot';
+      el.textContent = t;
+      el.dataset.time = t;
+      timeGrid.appendChild(el);
+    });
+    toDetailsBtn.disabled = true;
+    state.slot = null;
+  }
+
+  daySlider.addEventListener('click', e=>{
+    const pill = e.target.closest('.day-pill');
+    if(pill) selectDay(Number(pill.dataset.index));
+  });
+
+  timeGrid.addEventListener('click', e=>{
+    const el = e.target.closest('.time-slot');
+    if(!el) return;
+    document.querySelectorAll('.time-slot').forEach(s=>s.classList.remove('selected'));
+    el.classList.add('selected');
+    const day = mockDays[selectedDayIndex];
+    state.slot = day.dow + ' ' + day.num + ' ' + day.mon + ', ' + el.dataset.time;
+    toDetailsBtn.disabled = false;
+  });
 
   toSlotsBtn.addEventListener('click', ()=>{
     state.timezone = tzSelect.value;
-    renderSlots();
+    renderDays();
     stepTimezone.classList.add('hidden');
     stepSlots.classList.remove('hidden');
   });
@@ -315,15 +444,6 @@
   backToTz.addEventListener('click', ()=>{
     stepSlots.classList.add('hidden');
     stepTimezone.classList.remove('hidden');
-  });
-
-  slotGrid.addEventListener('click', e=>{
-    const slot = e.target.closest('.slot');
-    if(!slot) return;
-    document.querySelectorAll('.slot').forEach(s=>s.classList.remove('selected'));
-    slot.classList.add('selected');
-    state.slot = mockSlots[slot.dataset.index].label;
-    toDetailsBtn.disabled = false;
   });
 
   toDetailsBtn.addEventListener('click', ()=>{
@@ -349,7 +469,7 @@
     // (ver historia de usuario #5) y no crea el evento en el calendario
     // hasta que ella confirme.
     document.getElementById('pending-summary-detail').textContent =
-      name + ', tu solicitud para ' + state.service + ' el ' + state.slot + ' fue enviada.';
+      name + ', tu solicitud para ' + state.service + ' (' + formatDuration(state.duration) + ') el ' + state.slot + ' fue enviada.';
     stepDetails.classList.add('hidden');
     stepPending.classList.remove('hidden');
   });
