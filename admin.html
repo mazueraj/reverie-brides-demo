@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reverie Brides · Panel de administración</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FBF6EF; --tan:#C9A06C; --tan-dark:#A87D49;
+    --espresso:#382A1E; --espresso-soft:#5C4A3A; --hairline:#E4D9C8;
+    --success-bg:#EEF2E4; --success-text:#4C6329;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--cream);color:var(--espresso);font-family:'Jost',sans-serif;font-weight:300;line-height:1.6;}
+  h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:500;}
+  .hidden{display:none;}
+
+  /* Login screen */
+  #login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .login-card{max-width:340px;width:100%;background:var(--cream);border-radius:16px;padding:2.5rem 2rem;text-align:center;}
+  .mark{width:64px;height:64px;border-radius:50%;background:var(--tan);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+  .mark span{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--cream);font-size:22px;}
+  .login-title{font-size:19px;color:var(--espresso);margin-bottom:6px;}
+  .login-sub{font-size:12px;color:var(--espresso-soft);margin-bottom:28px;}
+  .google-btn{
+    border:1px solid var(--espresso);border-radius:4px;padding:12px;display:flex;align-items:center;
+    justify-content:center;gap:10px;cursor:pointer;background:#fff;font-size:13px;color:var(--espresso);
+    transition:background 0.15s ease;
+  }
+  .google-btn:hover{background:#F7EFE5;}
+  .login-note{font-size:11px;color:var(--tan-dark);margin-top:20px;}
+  .demo-flag{font-size:10px;color:var(--espresso-soft);margin-top:10px;opacity:0.7;}
+
+  /* Dashboard */
+  #dashboard{max-width:800px;margin:0 auto;padding:32px 24px;}
+  .dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+  .dash-title{font-size:20px;color:var(--espresso);}
+  .dash-sub{font-size:12px;color:var(--espresso-soft);margin-top:2px;}
+  .access-badge{background:var(--espresso);color:var(--cream);font-size:11px;padding:5px 12px;border-radius:20px;}
+  .signout-link{font-size:11px;color:var(--espresso-soft);text-decoration:underline;cursor:pointer;margin-top:6px;display:inline-block;}
+
+  .dash-grid{display:grid;grid-template-columns:220px 1fr;gap:16px;}
+  @media(max-width:640px){.dash-grid{grid-template-columns:1fr;}}
+
+  .client-list-panel{background:var(--cream);border:1px solid var(--hairline);border-radius:10px;padding:12px;}
+  .client-list-label{font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--tan-dark);margin-bottom:10px;}
+  .client-row{border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer;border:1px solid var(--hairline);background:#fff;}
+  .client-row.selected{background:var(--espresso);border-color:var(--espresso);color:var(--cream);}
+  .client-row .name{font-size:13px;font-weight:500;}
+  .client-row.selected .name{color:var(--cream);}
+  .client-row .meta{font-size:10px;color:var(--espresso-soft);}
+  .client-row.selected .meta{color:var(--cream);opacity:0.8;}
+
+  .detail-col{display:flex;flex-direction:column;gap:12px;}
+  .card{background:#fff;border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;}
+  .card-label{font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--tan-dark);margin-bottom:10px;}
+  .client-name{font-size:17px;color:var(--espresso);}
+  .client-contact{font-size:12px;color:var(--espresso-soft);margin-top:2px;}
+  .status-badge{font-size:11px;padding:4px 10px;border-radius:20px;}
+  .status-pagado{background:var(--success-bg);color:var(--success-text);}
+  .status-pendiente{background:#FBF0E4;color:var(--tan-dark);}
+  .status-vencido{background:#F7E4E1;color:#A84949;}
+  .summary-row{font-size:13px;color:var(--espresso);margin-bottom:8px;}
+  .content-idea{border:1px solid var(--hairline);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--espresso);margin-bottom:8px;}
+</style>
+</head>
+<body>
+
+<!-- Pantalla de acceso -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="mark"><span>Rèv</span></div>
+    <p class="login-title">Panel de administración</p>
+    <p class="login-sub">Acceso exclusivo para Daniela Muñoz</p>
+    <div class="google-btn" id="google-signin-btn">
+      <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.5 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.2-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 5.5 29.5 3 24 3c-7.7 0-14.3 4.4-17.7 10.7z"/><path fill="#4CAF50" d="M24 45c5.4 0 10.2-1.8 13.9-4.9l-6.4-5.4C29.5 36.6 26.9 37.5 24 37.5c-5.3 0-9.7-3.4-11.3-8.1l-6.5 5C9.6 40.5 16.2 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.3 5.7l6.4 5.4C40.9 36.4 45 30.9 45 24c0-1.2-.1-2.3-.4-3.5z"/></svg>
+      <span>Iniciar sesión con Google</span>
+    </div>
+    <p class="login-note">Solo cuentas autorizadas pueden acceder a este panel.</p>
+    <p class="demo-flag">Esta es una demostración. En producción, el backend verifica que el correo autenticado coincida exactamente con el de Daniela antes de mostrar el panel.</p>
+  </div>
+</div>
+
+<!-- Panel (oculto hasta iniciar sesión) -->
+<div id="dashboard" class="hidden">
+  <div class="dash-header">
+    <div>
+      <p class="dash-title">Panel de administración</p>
+      <p class="dash-sub">Reverie Brides</p>
+    </div>
+    <div style="text-align:right;">
+      <div class="access-badge">Acceso: Daniela</div>
+      <div class="signout-link" id="signout-link">Cerrar sesión</div>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <div class="client-list-panel">
+      <p class="client-list-label">Clientas</p>
+      <div id="client-list"></div>
+    </div>
+    <div class="detail-col" id="client-detail"></div>
+  </div>
+</div>
+
+<script>
+  const clients = [
+    {
+      name: 'Valentina García', service:'Novia', channel:'WhatsApp', contact:'+57 300 123 4567',
+      status:'pagado', statusLabel:'Pagado',
+      wedding:'Ceremonia religiosa en octubre, vestido de novia clásico con encaje',
+      makeup:'Look natural, tonos tierra, base de larga duración para clima cálido',
+      notes:'Piel sensible, prefiere productos hipoalergénicos. Trae a su madre y dama de honor a la prueba.',
+      content:[
+        'Reel de "antes y después" del look natural con tonos tierra',
+        'Carrusel mostrando productos hipoalergénicos usados en la prueba',
+        'Historia detrás de cámaras el día de la boda en octubre'
+      ]
+    },
+    {
+      name: 'Isabella T.', service:'Quince', channel:'Instagram', contact:'@isabella.t',
+      status:'pendiente', statusLabel:'Pendiente',
+      wedding:'Fiesta de quince años en salón de eventos, vestido rosa palo con brillos',
+      makeup:'Look glam, pestañas postizas, brillo en pómulos',
+      notes:'Primera vez usando maquillaje profesional, algo nerviosa. Madre estará presente.',
+      content:[
+        'Reel del proceso completo de transformación',
+        'Carrusel de referencias de vestido y maquillaje a juego'
+      ]
+    },
+    {
+      name: 'Camila R.', service:'Novia', channel:'WhatsApp', contact:'+57 301 987 6543',
+      status:'vencido', statusLabel:'Pago vencido',
+      wedding:'Boda de día completo, vestido de novia bohemio',
+      makeup:'Look editorial, cejas marcadas, labios nude',
+      notes:'Solicitó cambio de horario dos veces. Confirmar disponibilidad antes de seguir.',
+      content:[
+        'Publicación de "día completo" mostrando la jornada de novia'
+      ]
+    },
+    {
+      name: 'Sofía M.', service:'Sesión', channel:'Instagram', contact:'@sofia.m',
+      status:'pagado', statusLabel:'Pagado',
+      wedding:'Sesión de contenido para marca personal, sin evento asociado',
+      makeup:'Look editorial versátil para varias tomas',
+      notes:'Trae su propio fotógrafo. Necesita retoques entre tomas.',
+      content:[
+        'Detrás de cámaras de la sesión para el feed de Reverie Brides'
+      ]
+    },
+  ];
+
+  let selectedIndex = 0;
+
+  function renderClientList(){
+    const list = document.getElementById('client-list');
+    list.innerHTML = '';
+    clients.forEach((c, i) => {
+      const row = document.createElement('div');
+      row.className = 'client-row' + (i === selectedIndex ? ' selected' : '');
+      row.innerHTML = '<div class="name">'+c.name+'</div><div class="meta">'+c.service+' · '+c.channel+'</div>';
+      row.addEventListener('click', () => { selectedIndex = i; renderClientList(); renderDetail(); });
+      list.appendChild(row);
+    });
+  }
+
+  function renderDetail(){
+    const c = clients[selectedIndex];
+    const detail = document.getElementById('client-detail');
+    detail.innerHTML =
+      '<div class="card">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;">'
+          + '<div><div class="client-name">'+c.name+'</div>'
+          + '<div class="client-contact">Prefiere ser contactada por '+c.channel+' · '+c.contact+'</div></div>'
+          + '<div class="status-badge status-'+c.status+'">'+c.statusLabel+'</div>'
+        + '</div>'
+      + '</div>'
+      + '<div class="card">'
+        + '<p class="card-label">Resumen de la clienta</p>'
+        + '<div class="summary-row"><strong>Boda/Quince:</strong> '+c.wedding+'</div>'
+        + '<div class="summary-row"><strong>Maquillaje deseado:</strong> '+c.makeup+'</div>'
+        + '<div class="summary-row"><strong>Notas adicionales:</strong> '+c.notes+'</div>'
+      + '</div>'
+      + '<div class="card">'
+        + '<p class="card-label">Sugerencias de contenido para Instagram</p>'
+        + c.content.map(item => '<div class="content-idea">'+item+'</div>').join('')
+      + '</div>';
+  }
+
+  document.getElementById('google-signin-btn').addEventListener('click', () => {
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+    renderClientList();
+    renderDetail();
+  });
+
+  document.getElementById('signout-link').addEventListener('click', () => {
+    document.getElementById('dashboard').classList.add('hidden');
+    document.getElementById('login-screen').classList.remove('hidden');
+  });
+</script>
+
+</body>
+</html>
