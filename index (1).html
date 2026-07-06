@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reverie Brides · Reservar cita</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FBF6EF;
+    --tan:#C9A06C;
+    --tan-dark:#A87D49;
+    --espresso:#382A1E;
+    --espresso-soft:#5C4A3A;
+    --rose:#D9A6A0;
+    --rose-deep:#B97D74;
+    --hairline:#E4D9C8;
+    --success-bg:#EEF2E4;
+    --success-text:#4C6329;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--cream);
+    color:var(--espresso);
+    font-family:'Jost',sans-serif;
+    font-weight:300;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.logotype{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:500;
+    letter-spacing:0.01em;
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:0 24px;}
+  a{color:inherit;}
+
+  /* Hero */
+  .hero{padding:56px 24px 40px;text-align:center;}
+  .mark{
+    width:88px;height:88px;border-radius:50%;
+    background:var(--tan);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 20px;
+  }
+  .mark span{
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic;font-weight:500;font-size:34px;color:var(--cream);
+  }
+  .logotype{font-size:30px;color:var(--espresso);margin-bottom:6px;}
+  .tagline{font-size:15px;color:var(--espresso-soft);max-width:340px;margin:0 auto 28px;}
+  .cta{
+    display:inline-block;background:var(--espresso);color:var(--cream);
+    font-family:'Jost',sans-serif;font-size:14px;letter-spacing:0.04em;
+    padding:14px 34px;border-radius:2px;border:none;cursor:pointer;
+    text-transform:uppercase;transition:background 0.2s ease;
+  }
+  .cta:hover{background:var(--tan-dark);}
+  .cta.ghost{background:transparent;color:var(--espresso);border:1px solid var(--espresso);}
+  .cta.ghost:hover{background:var(--espresso);color:var(--cream);}
+  .cta:disabled{opacity:0.4;cursor:not-allowed;}
+  .cta:disabled:hover{background:var(--espresso);}
+
+  /* Section divider */
+  .divider{border:none;border-top:1px solid var(--hairline);margin:0;}
+
+  /* Services */
+  .services{padding:40px 24px;}
+  .services h2{font-size:22px;text-align:center;margin-bottom:24px;}
+  .service-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+  .service-card{
+    border:1px solid var(--hairline);border-radius:6px;padding:18px 10px;
+    text-align:center;cursor:pointer;background:#fff;transition:border-color 0.2s ease,transform 0.15s ease;
+  }
+  .service-card:hover{border-color:var(--tan);transform:translateY(-2px);}
+  .service-card.selected{border-color:var(--tan-dark);background:var(--success-bg,#F7EFE5);box-shadow:inset 0 0 0 1px var(--tan-dark);}
+  .service-card .label{font-family:'Cormorant Garamond',serif;font-size:18px;display:block;margin-bottom:4px;}
+  .service-card .sub{font-size:11px;color:var(--espresso-soft);}
+
+  /* Booking panel */
+  .booking{padding:8px 24px 56px;}
+  .step-label{font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--tan-dark);margin-bottom:8px;}
+  .field-row{margin-bottom:18px;}
+  label{display:block;font-size:12px;color:var(--espresso-soft);margin-bottom:6px;}
+  select,input{
+    width:100%;font-family:'Jost',sans-serif;font-size:14px;color:var(--espresso);
+    padding:10px 12px;border:1px solid var(--hairline);border-radius:4px;background:#fff;
+  }
+  select:focus,input:focus{outline:2px solid var(--tan);outline-offset:1px;}
+
+  .slot-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px;}
+  .slot{
+    border:1px solid var(--hairline);border-radius:4px;padding:12px 10px;text-align:center;
+    font-size:13px;cursor:pointer;background:#fff;transition:border-color 0.2s ease;
+  }
+  .slot:hover{border-color:var(--tan);}
+  .slot.selected{border-color:var(--tan-dark);background:#F7EFE5;font-weight:500;}
+  .slot.empty{color:var(--espresso-soft);cursor:default;border-style:dashed;}
+  .slot.empty:hover{border-color:var(--hairline);}
+
+  .step-actions{display:flex;justify-content:space-between;align-items:center;margin-top:24px;}
+  .link-btn{background:none;border:none;font-size:13px;color:var(--espresso-soft);cursor:pointer;text-decoration:underline;}
+
+  .pending-note{
+    display:flex;gap:10px;align-items:flex-start;background:#FBF0E4;border:1px solid var(--tan);
+    border-radius:6px;padding:14px 16px;margin:20px 0;font-size:13px;color:var(--espresso-soft);
+  }
+  .pending-dot{width:8px;height:8px;border-radius:50%;background:var(--tan-dark);margin-top:5px;flex:none;animation:pulse 1.8s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
+
+  .confirm-card{
+    border:1px solid var(--hairline);border-radius:8px;padding:22px;background:#fff;text-align:center;
+  }
+  .confirm-card h3{font-size:22px;margin-bottom:6px;}
+  .confirm-card p{font-size:13px;color:var(--espresso-soft);margin-bottom:16px;}
+  .pay-link{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--cream);border:1px dashed var(--tan-dark);border-radius:6px;
+    padding:12px;font-size:13px;color:var(--tan-dark);margin-bottom:16px;
+  }
+
+  footer{padding:32px 24px 48px;text-align:center;font-size:12px;color:var(--espresso-soft);}
+  footer a{text-decoration:underline;}
+
+  .hidden{display:none;}
+
+  @media(max-width:400px){
+    .service-grid{grid-template-columns:1fr 1fr 1fr;gap:8px;}
+    .service-card .label{font-size:15px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <section class="hero">
+    <div class="mark"><span>Rèv</span></div>
+    <h1 class="logotype">Reverie Brides</h1>
+    <p class="tagline">Maquillaje de novia en Bogotá, por Daniela Muñoz. Reserva tu cita de prueba en minutos.</p>
+    <button class="cta" id="start-btn">Reservar cita</button>
+  </section>
+
+  <hr class="divider">
+
+  <section class="services" id="services-section">
+    <h2>¿Qué estás buscando?</h2>
+    <div class="service-grid" id="service-grid">
+      <div class="service-card" data-service="Novia">
+        <span class="label">Novia</span>
+        <span class="sub">Prueba + día de la boda</span>
+      </div>
+      <div class="service-card" data-service="Quinceañera">
+        <span class="label">Quince</span>
+        <span class="sub">Maquillaje de quinceañera</span>
+      </div>
+      <div class="service-card" data-service="Sesión">
+        <span class="label">Sesión</span>
+        <span class="sub">Fotos o contenido</span>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <section class="booking hidden" id="booking-section">
+
+    <!-- Paso 1: zona horaria -->
+    <div id="step-timezone">
+      <p class="step-label">Paso 1 de 3 · Tu zona horaria</p>
+      <div class="field-row">
+        <label for="tz-select">¿Desde dónde nos escribes?</label>
+        <select id="tz-select">
+          <option value="America/Bogota">Colombia (hora de Bogotá)</option>
+          <option value="Europe/Madrid">España (hora de Madrid)</option>
+          <option value="America/New_York">Estados Unidos, costa este</option>
+          <option value="America/Los_Angeles">Estados Unidos, costa oeste</option>
+          <option value="America/Mexico_City">México (Ciudad de México)</option>
+        </select>
+      </div>
+      <div class="step-actions">
+        <span></span>
+        <button class="cta" id="to-slots-btn">Ver horarios disponibles</button>
+      </div>
+    </div>
+
+    <!-- Paso 2: horario -->
+    <div id="step-slots" class="hidden">
+      <p class="step-label">Paso 2 de 3 · Elige un horario</p>
+      <p style="font-size:13px;color:var(--espresso-soft);margin-bottom:14px;" id="slot-tz-note"></p>
+      <div class="slot-grid" id="slot-grid"></div>
+      <div class="step-actions">
+        <button class="link-btn" id="back-to-tz">Volver</button>
+        <button class="cta" id="to-details-btn" disabled>Continuar</button>
+      </div>
+    </div>
+
+    <!-- Paso 3: datos -->
+    <div id="step-details" class="hidden">
+      <p class="step-label">Paso 3 de 3 · Tus datos</p>
+      <div class="field-row">
+        <label for="input-name">Nombre completo</label>
+        <input type="text" id="input-name" placeholder="Ej. Valentina García">
+      </div>
+      <div class="field-row">
+        <label for="input-whatsapp">Número de WhatsApp</label>
+        <input type="tel" id="input-whatsapp" placeholder="Ej. +57 300 123 4567">
+      </div>
+      <div class="field-row">
+        <label for="input-instagram">Instagram (opcional)</label>
+        <input type="text" id="input-instagram" placeholder="@tu_usuario">
+      </div>
+      <div class="step-actions">
+        <button class="link-btn" id="back-to-slots">Volver</button>
+        <button class="cta" id="confirm-btn">Solicitar esta cita</button>
+      </div>
+    </div>
+
+    <!-- Paso 4: confirmación pendiente -->
+    <div id="step-pending" class="hidden">
+      <div class="pending-note">
+        <div class="pending-dot"></div>
+        <div>
+          Tu horario está reservado temporalmente. Daniela revisa cada solicitud
+          antes de confirmarla, así que te escribirá por WhatsApp muy pronto
+          para confirmar la fecha y enviarte el enlace de pago.
+        </div>
+      </div>
+      <div class="confirm-card">
+        <h3 id="pending-summary-title">Solicitud enviada</h3>
+        <p id="pending-summary-detail"></p>
+        <button class="cta ghost" id="restart-btn">Hacer otra solicitud</button>
+      </div>
+    </div>
+
+  </section>
+
+  <footer>
+    <p>Reverie Brides · Bogotá, Colombia</p>
+    <p><a href="https://www.instagram.com/reverie_brides" target="_blank" rel="noopener">@reverie_brides</a></p>
+  </footer>
+
+</div>
+
+<script>
+  const state = { service:null, timezone:'America/Bogota', slot:null };
+
+  const serviceGrid = document.getElementById('service-grid');
+  const servicesSection = document.getElementById('services-section');
+  const bookingSection = document.getElementById('booking-section');
+  const startBtn = document.getElementById('start-btn');
+
+  function selectService(el){
+    document.querySelectorAll('.service-card').forEach(c=>c.classList.remove('selected'));
+    el.classList.add('selected');
+    state.service = el.dataset.service;
+    revealBooking();
+  }
+
+  serviceGrid.addEventListener('click', e=>{
+    const card = e.target.closest('.service-card');
+    if(card) selectService(card);
+  });
+
+  startBtn.addEventListener('click', ()=>{
+    servicesSection.scrollIntoView({behavior:'smooth'});
+  });
+
+  function revealBooking(){
+    bookingSection.classList.remove('hidden');
+    bookingSection.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  // Paso 1 -> 2
+  const tzSelect = document.getElementById('tz-select');
+  const stepTimezone = document.getElementById('step-timezone');
+  const stepSlots = document.getElementById('step-slots');
+  const stepDetails = document.getElementById('step-details');
+  const stepPending = document.getElementById('step-pending');
+  const slotGrid = document.getElementById('slot-grid');
+  const slotTzNote = document.getElementById('slot-tz-note');
+  const toSlotsBtn = document.getElementById('to-slots-btn');
+  const toDetailsBtn = document.getElementById('to-details-btn');
+  const backToTz = document.getElementById('back-to-tz');
+  const backToSlots = document.getElementById('back-to-slots');
+  const confirmBtn = document.getElementById('confirm-btn');
+  const restartBtn = document.getElementById('restart-btn');
+
+  // Datos de ejemplo. En producción, estos horarios vienen de una llamada
+  // al backend que consulta Google Calendar (freebusy) en America/Bogota
+  // y los convierte a la zona horaria elegida por la clienta.
+  const mockSlots = [
+    { label:'Mar 14 oct, 5:00 p.m.' },
+    { label:'Jue 16 oct, 6:30 p.m.' },
+    { label:'Sáb 18 oct, 3:00 p.m.' },
+    { label:'Lun 20 oct, 4:00 p.m.' },
+  ];
+
+  function renderSlots(){
+    const tzLabel = tzSelect.options[tzSelect.selectedIndex].text;
+    slotTzNote.textContent = 'Horarios mostrados en: ' + tzLabel;
+    slotGrid.innerHTML = '';
+    mockSlots.forEach((s,i)=>{
+      const div = document.createElement('div');
+      div.className = 'slot';
+      div.textContent = s.label;
+      div.dataset.index = i;
+      slotGrid.appendChild(div);
+    });
+  }
+
+  toSlotsBtn.addEventListener('click', ()=>{
+    state.timezone = tzSelect.value;
+    renderSlots();
+    stepTimezone.classList.add('hidden');
+    stepSlots.classList.remove('hidden');
+  });
+
+  backToTz.addEventListener('click', ()=>{
+    stepSlots.classList.add('hidden');
+    stepTimezone.classList.remove('hidden');
+  });
+
+  slotGrid.addEventListener('click', e=>{
+    const slot = e.target.closest('.slot');
+    if(!slot) return;
+    document.querySelectorAll('.slot').forEach(s=>s.classList.remove('selected'));
+    slot.classList.add('selected');
+    state.slot = mockSlots[slot.dataset.index].label;
+    toDetailsBtn.disabled = false;
+  });
+
+  toDetailsBtn.addEventListener('click', ()=>{
+    stepSlots.classList.add('hidden');
+    stepDetails.classList.remove('hidden');
+  });
+
+  backToSlots.addEventListener('click', ()=>{
+    stepDetails.classList.add('hidden');
+    stepSlots.classList.remove('hidden');
+  });
+
+  confirmBtn.addEventListener('click', ()=>{
+    const name = document.getElementById('input-name').value.trim();
+    const whatsapp = document.getElementById('input-whatsapp').value.trim();
+    if(!name || !whatsapp){
+      alert('Por favor completa tu nombre y número de WhatsApp.');
+      return;
+    }
+    // En producción: este paso envía la solicitud al backend, que la
+    // registra como "pendiente de aprobación" en el panel de Daniela
+    // (ver historia de usuario #5) y no crea el evento en el calendario
+    // hasta que ella confirme.
+    document.getElementById('pending-summary-detail').textContent =
+      name + ', tu solicitud para ' + state.service + ' el ' + state.slot + ' fue enviada.';
+    stepDetails.classList.add('hidden');
+    stepPending.classList.remove('hidden');
+  });
+
+  restartBtn.addEventListener('click', ()=>{
+    window.location.reload();
+  });
+</script>
+
+</body>
+</html>
